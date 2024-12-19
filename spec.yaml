@@ -2,7 +2,7 @@ name: zero2prod
 # See https://www.digitalocean.com/docs/app-platform/#regional-availability for the available options
 # You can get region slugs from https://www.digitalocean.com/docs/platform/availability-matrix/
 # `fra` stands for Frankfurt (Germany - EU)
-region: sf02
+region: sfo
 services:
   - name: zero2prod
     # Relative to the repository root
@@ -11,7 +11,7 @@ services:
     github:
       branch: main
       deploy_on_push: true
-      repo: greatlakescoder/zero-to-production
+      repo: greatlakescoder/zero_to_prod
     # Active probe used by DigitalOcean's to ensure our application is healthy
     health_check:
       # The path to our health check endpoint! It turned out to be useful in the end!
