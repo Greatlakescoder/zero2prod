@@ -1,4 +1,4 @@
 application:
   host: 127.0.0.1
-databse:
+database:
   require_ssl: false
