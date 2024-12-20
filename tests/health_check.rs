@@ -151,3 +151,34 @@ async fn subscribe_returns_a_400_when_data_is_missing() {
 
     // %20 is space url encoded, %40 is @
 }
+
+#[tokio::test]
+async fn subscribe_returns_a_400_when_fields_are_present_but_invalid() {
+    let app = spawn_app().await;
+    let client = reqwest::Client::new();
+
+    let test_cases = vec![
+        ("name=&email=wes.h%40gmail.com", "empty_name"),
+        ("name=wes&email=", "missing the email"),
+        ("name=wes&email=blarg", "not a valid email"),
+    ];
+
+    for (invalid_body, error_message) in test_cases {
+        let response = client
+            .post(&format!("{}/subscriptions", &app.address))
+            .header("Content-Type", "application/x-www-form-urlencoded")
+            .body(invalid_body)
+            .send()
+            .await
+            .expect("Failed to send request");
+
+        assert_eq!(
+            400,
+            response.status().as_u16(),
+            "Api error {}",
+            error_message
+        )
+    }
+
+    // %20 is space url encoded, %40 is @
+}
