@@ -1,12 +1,10 @@
-use secrecy::{ExposeSecret, SecretString};
+use secrecy::SecretString;
 use sqlx::{Connection, Executor, PgConnection, PgPool};
-use std::net::TcpListener;
 use std::sync::LazyLock;
 use uuid::Uuid;
 use wiremock::MockServer;
 use zero_to_prod::{
     configuration::{get_configuration, DatabaseSettings},
-    email_client::EmailClient,
     startup::{get_connection_pool, Application},
     telemetry::{get_subscriber, init_subscriber},
 };
@@ -28,17 +26,19 @@ static TRACING: LazyLock<()> = LazyLock::new(|| {
 pub struct TestApp {
     pub address: String,
     pub db_pool: PgPool,
+    pub email_server: MockServer,
+    pub port: u16
 }
 
-impl  TestApp {
-    pub async fn post_subscriptions(&self,body:String) -> reqwest::Response {
+impl TestApp {
+    pub async fn post_subscriptions(&self, body: String) -> reqwest::Response {
         reqwest::Client::new()
-        .post(&format!("{}/subscriptions",&self.address))
-        .header("Content-Type", "application/x-www-form-urlencoded")
-        .body(body)
-        .send()
-        .await
-        .expect("Failed to excute request")
+            .post(&format!("{}/subscriptions", &self.address))
+            .header("Content-Type", "application/x-www-form-urlencoded")
+            .body(body)
+            .send()
+            .await
+            .expect("Failed to excute request")
     }
 }
 
@@ -67,13 +67,16 @@ pub async fn spawn_app() -> TestApp {
     let application = Application::build(configuration.clone())
         .await
         .expect("Failed to build application");
+    let application_port = application.port();
 
     let address = format!("http://127.0.0.1:{}", application.port());
 
     let _ = tokio::spawn(application.run_until_stopped());
     TestApp {
         address,
+        port: application_port,
         db_pool: get_connection_pool(&configuration.database),
+        email_server,
     }
 }
 
