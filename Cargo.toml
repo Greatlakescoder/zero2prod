@@ -14,7 +14,7 @@ name = "zero2prod"
 [dependencies]
 actix-web = "4.9.0"
 serde = { version = "1.0.216", features = ["derive"] }
-tokio = { version = "1.42.0", features = ["macros", "rt-multi-thread"] }
+tokio = { version = "1.42.0", features = ["macros", "rt-multi-thread","rt"] }
 config = "0.14"
 chrono = {version = "0.4.22", default-features = false, features = ["clock"]}
 uuid = { version = "1.11.0", features = ["v4"] }
@@ -32,6 +32,7 @@ fake = "3.0.1"
 quickcheck = "1.0.3"
 quickcheck_macros = "1.0.0"
 rand = "0.8.5"
+lettre = "0.11.11"
 [dependencies.sqlx]
 version = "0.8"
 default-features = false
@@ -43,6 +44,11 @@ features = [
     "chrono",
     "migrate"
 ]
+[dependencies.reqwest]
+version = "0.12"
+default-features = false
+features = ["json", "rustls-tls"]
 # Only used in tests not included in final binary
 [dev-dependencies]
-reqwest = "0.12.9"
+wiremock="0.6"
+serde_json = "1.0.61"

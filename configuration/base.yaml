@@ -6,3 +6,8 @@ database:
   database_name: "newsletter"
 application:
   port: 8000
+email_client:
+  base_url: localhost
+  sender_email: "selfishtoaster@gmail.com"
+  timeout_milliseconds: 10000
+  authorization_token: "my-secret-token"

@@ -1,22 +1,22 @@
 use std::net::TcpListener;
 
-use sqlx::PgPool;
 use secrecy::ExposeSecret;
+use sqlx::PgPool;
 
 use zero_to_prod::{
     configuration::get_configuration,
-    startup::run,
+    email_client::EmailClient,
+    startup::{run, Application},
     telemetry::{get_subscriber, init_subscriber},
 };
 
 #[tokio::main]
 async fn main() -> Result<(), std::io::Error> {
-    let subsriber = get_subscriber("zero2prod".into(), "info".into(), std::io::stdout);
-    init_subscriber(subsriber);
+    let subscriber = get_subscriber("zero2prod".into(), "info".into(), std::io::stdout);
+    init_subscriber(subscriber);
 
-    let config = get_configuration().expect("Unable to read config file");
-    let connection_pool = PgPool::connect_lazy_with(config.database.connect_options());
-    let address = format!("{}:{}", config.application.host,config.application.port);
-    let listener = TcpListener::bind(&address).expect("Failed to bind to port 8000");
-    run(listener, connection_pool)?.await
+    let configuration = get_configuration().expect("Unable to read config file");
+    let application = Application::build(configuration).await?;
+    application.run_until_stopped().await?;
+    Ok(())
 }
